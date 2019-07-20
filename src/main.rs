@@ -1,3 +1,7 @@
+extern crate getopts;
+use getopts::Options;
+use std::env;
+
 fn step_rule90(l: bool,c: bool, r: bool) -> bool {
     match (l,c,r) {
         (false,false,false) => false,
@@ -46,13 +50,34 @@ fn format_state(xs: &Vec<bool>) -> String {
 }
 
 fn main() {
-    let nx = 100;
-    let mut nt = 200;
+    let args: Vec<String> = env::args().collect();
+    let mut opts = Options::new();
+    opts.reqopt("r","","Set rule", "RULE");
+    opts.reqopt("x","nx","Set the number of grid", "NX");
+    opts.reqopt("t","nt","Set the number of update", "NT");
+    let matches = match opts.parse(&args[1..]) {
+        Ok(m) => { m },
+        Err(f) => { panic!(f.to_string()) },
+    };
+
+    let step = match matches.opt_str("r") {
+        Some(ref r) if r == "rule90" => step_rule90,
+        r => panic!(format!("Not support: {:?}",r)),
+    };
+    let read: fn(String) -> usize = |s| s.parse().expect("Need a number");
+    let nx = match matches.opt_str("x").map(read) {
+        Some(x) if x > 0 => { x },
+        _ => panic!("Need -x <int>"),
+    };
+    let mut nt = match matches.opt_str("t").map(read) {
+        Some(t) if t > 0 => { t },
+        _ => panic!("Need -t <int>"),
+    };
     let mut xs = init(nx);
 
     while nt > 0 {
         println!("|{}|",format_state(&xs));
-        xs = update(step_rule90,&xs);
+        xs = update(step,&xs);
         nt -= 1;
     }
 }
