@@ -2,6 +2,32 @@ extern crate getopts;
 use getopts::Options;
 use std::env;
 
+fn step_rule30(l: bool,c: bool, r: bool) -> bool {
+    match (l,c,r) {
+        (false,false,false) => false,
+        (false,false,true) => true,
+        (false,true,false) => true,
+        (false,true,true) => true,
+        (true,false,false) => true,
+        (true,false,true) => false,
+        (true,true,false) => false,
+        (true,true,true) => false,
+    }
+}
+
+fn step_rule110(l: bool,c: bool, r: bool) -> bool {
+    match (l,c,r) {
+        (false,false,false) => false,
+        (false,false,true) => true,
+        (false,true,false) => true,
+        (false,true,true) => true,
+        (true,false,false) => false,
+        (true,false,true) => true,
+        (true,true,false) => true,
+        (true,true,true) => false,
+    }
+}
+
 fn step_rule90(l: bool,c: bool, r: bool) -> bool {
     match (l,c,r) {
         (false,false,false) => false,
@@ -61,6 +87,8 @@ fn main() {
     };
 
     let step = match matches.opt_str("r") {
+        Some(ref r) if r == "rule30" => step_rule30,
+        Some(ref r) if r == "rule110" => step_rule110,
         Some(ref r) if r == "rule90" => step_rule90,
         r => panic!(format!("Not support: {:?}",r)),
     };
